@@ -8,14 +8,14 @@ import { Restaurant } from '@/models/Restaurant';
 import Link from 'next/link';
 import { calculateDistance } from '@/utils/distance';
 
-export default async function VendorDetailsPage({ params }: { params: any }) {
+export default async function VendorDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   
   if (!session) {
     redirect('/login');
   }
 
-  const resolvedParams = await Promise.resolve(params);
+  const resolvedParams = await params;
   const vendorId = resolvedParams.id;
 
   await connectToDatabase();

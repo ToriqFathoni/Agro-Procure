@@ -4,10 +4,10 @@ import { Vendor } from '@/models/Vendor';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
     const vendorId = resolvedParams.id;
 
     await connectToDatabase();

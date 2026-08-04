@@ -9,10 +9,10 @@ cloudinary.config({
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ orderId: string, vendorId: string }> }
 ) {
   try {
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
     const { orderId, vendorId } = resolvedParams;
 
     const formData = await request.formData();

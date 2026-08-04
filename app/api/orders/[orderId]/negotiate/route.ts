@@ -6,7 +6,7 @@ import { Order } from '@/models/Order';
 import { Vendor } from '@/models/Vendor';
 import { getClient } from '@/services/whatsapp';
 
-export async function POST(req: Request, { params }: { params: { orderId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -16,7 +16,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
 
     await connectToDatabase();
     
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
 
     const order = await Order.findById(resolvedParams.orderId);
     if (!order) {
