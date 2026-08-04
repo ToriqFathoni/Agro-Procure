@@ -7,6 +7,11 @@ if (!(global as any)._whatsappClient) {
 }
 
 export function initializeClient() {
+  if (process.env.ENABLE_BOT !== 'true') {
+    console.log('WhatsApp Bot is disabled by ENABLE_BOT env variable.');
+    return;
+  }
+
   if ((global as any)._whatsappClient) {
     return;
   }
