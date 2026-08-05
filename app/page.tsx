@@ -27,7 +27,8 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: session } = useSession();
+  const sessionContext = useSession();
+  const session = sessionContext?.data;
   const router = useRouter();
 
   const handleCTA = () => {
