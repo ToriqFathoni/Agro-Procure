@@ -4,7 +4,6 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import connectToDatabase from '@/lib/mongodb';
 import { Order } from '@/models/Order';
 import { Vendor } from '@/models/Vendor';
-import { getClient } from '@/services/whatsapp';
 
 export async function POST(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
   try {
@@ -39,12 +38,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ orderId
 
     const vendorIds = order.allocations.map((a: any) => a.vendor_id);
     const vendors = await Vendor.find({ _id: { $in: vendorIds } });
-    const whatsappClient = getClient();
 
     for (let allocation of order.allocations) {
       if (allocation.status === 'NEGOTIATING') {
         const vendor = vendors.find((v: any) => v._id.toString() === allocation.vendor_id.toString());
-        if (vendor && whatsappClient) {
+        if (vendor) {
           let phone = vendor.whatsapp_number.replace(/\D/g, '');
           if (phone.startsWith('0')) {
             phone = '62' + phone.substring(1);
@@ -56,7 +54,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ orderId
           const message = `Halo, kami dari Agro-Procurement. Kami membutuhkan pasokan ${order.item_name} sebanyak ${allocation.allocated_qty}. Apakah Anda dapat memenuhinya dengan harga maksimal Rp ${order.max_price_het.toLocaleString('id-ID')}? Balas YA atau TIDAK.`;
 
           try {
-            await whatsappClient.sendMessage(phone, message);
+            const apiUrl = process.env.NEXT_PUBLIC_BOT_API_URL || 'http://localhost:3001';
+            await fetch(`${apiUrl}/api/send-message`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ number: phone, message })
+            });
           } catch (e) {
             console.error('WA Send Error:', e);
           }
