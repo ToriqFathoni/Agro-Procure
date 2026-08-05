@@ -103,14 +103,6 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/30 border border-blue-400/30 text-blue-50 text-sm font-semibold mb-6 backdrop-blur-sm shadow-inner">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-                </span>
-                Sistem AI Orchestrator Aktif
-              </div>
-              
               <h1 className="text-4xl sm:text-5xl lg:text-[4rem] font-bold text-white leading-[1.1] mb-6 tracking-tight">
                 Revolusi Rantai <br className="hidden lg:block" />
                 Pasok F&B.
