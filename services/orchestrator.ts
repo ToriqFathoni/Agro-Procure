@@ -52,17 +52,50 @@ export async function allocateRemainingQuantity(orderId: string, remainingQty: n
 
     const escapedName = order.item_name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     
-    const vendors = await Vendor.find({
+    const activeVendors = await Vendor.find({
       status: 'ACTIVE',
       commodities: { $regex: new RegExp(`^${escapedName}$`, 'i') }
-    }).sort({ fulfillment_score: -1 });
+    });
 
     const existingVendorIds = order.allocations.map((a: any) => a.vendor_id.toString());
-    
-    const availableVendors = vendors.filter(v => !existingVendorIds.includes(v._id.toString()));
+    const availableVendors = activeVendors.filter(v => !existingVendorIds.includes(v._id.toString()));
 
-    if (availableVendors.length > 0) {
-      const nextVendor = availableVendors[0];
+    const orderAddrParts = order.delivery_address.split(',');
+    const orderProvince = orderAddrParts.length > 1 ? orderAddrParts[orderAddrParts.length - 1].trim().toLowerCase() : '';
+
+    let matchedVendors = availableVendors.map(v => {
+      let dynamicScore = v.fulfillment_score;
+      
+      if (orderProvince && v.address) {
+        const vendorAddrParts = v.address.split(',');
+        const vendorProvince = vendorAddrParts.length > 1 ? vendorAddrParts[vendorAddrParts.length - 1].trim().toLowerCase() : '';
+        if (vendorProvince && vendorProvince !== orderProvince) {
+          dynamicScore -= 0.4;
+        }
+      }
+
+      if (order.delivery_location?.latitude !== undefined && order.delivery_location?.longitude !== undefined && v.location?.latitude && v.location?.longitude) {
+        const toRad = (val: number) => val * (Math.PI / 180);
+        const R = 6371;
+        const dLat = toRad(v.location.latitude - order.delivery_location.latitude);
+        const dLon = toRad(v.location.longitude - order.delivery_location.longitude);
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(toRad(order.delivery_location.latitude)) * Math.cos(toRad(v.location.latitude)) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const dist = R * c;
+        const penalty = Math.min(dist * 0.001, 0.3);
+        dynamicScore -= penalty;
+      }
+      
+      dynamicScore = parseFloat(Math.max(0.1, dynamicScore).toFixed(2));
+      return { vendor: v, dynamicScore };
+    });
+
+    matchedVendors.sort((a, b) => b.dynamicScore - a.dynamicScore);
+
+    if (matchedVendors.length > 0) {
+      const nextVendor = matchedVendors[0].vendor;
       order.allocations.push({
         vendor_id: nextVendor._id,
         allocated_qty: remainingQty,
