@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import { Order } from '@/models/Order';
 import { v2 as cloudinary } from 'cloudinary';
+import { reallocateDeficit } from '@/services/orchestrator';
 
 cloudinary.config({
   secure: true
@@ -19,7 +20,7 @@ export async function PATCH(
     const status = formData.get('status') as string;
     const file = formData.get('file') as File | null;
 
-    if (!status || !['COMPLETED', 'DELIVERED', 'QC_FAILED', 'ACCEPTED'].includes(status)) {
+    if (!status || !['COMPLETED', 'DELIVERED', 'QC_FAILED', 'ACCEPTED', 'PARTIAL_ACCEPTED', 'REJECTED'].includes(status)) {
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
     }
 
@@ -65,6 +66,10 @@ export async function PATCH(
     }
 
     await order.save();
+
+    if (status === 'PARTIAL_ACCEPTED' || status === 'REJECTED') {
+      await reallocateDeficit(orderId);
+    }
 
     return NextResponse.json({ success: true, data: order }, { status: 200 });
   } catch (error: any) {
