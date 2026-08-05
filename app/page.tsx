@@ -163,7 +163,7 @@ export default function Home() {
           <path d="M0,60 C480,180 960,-60 1440,60 L1440,120 L0,120 Z"></path>
         </svg>
       </section>
-
+      {/* 
       <section id="ekosistem" className="bg-blue-50 py-10 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">
@@ -177,6 +177,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
       <section id="solusi" className="py-24 bg-gradient-to-b from-blue-50 via-white to-slate-50 relative overflow-hidden">
         
