@@ -70,6 +70,16 @@ export default function OrderDetailsClient({ order, vendorMap }: { order: any, v
     }
   };
 
+  const handleCancelSearch = async () => {
+    setLoading('cancel-search');
+    try {
+      const res = await fetch(`/api/orders/${order._id}/cancel`, { method: 'POST' });
+      if (res.ok) router.refresh();
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
@@ -105,9 +115,17 @@ export default function OrderDetailsClient({ order, vendorMap }: { order: any, v
               <h1 className="text-2xl font-bold text-slate-900 tracking-tight">{order.item_name}</h1>
               <p className="text-sm text-slate-500 mt-1 font-medium">Order ID: {order._id}</p>
             </div>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-500/10 self-start sm:self-auto">
-              {order.status}
-            </span>
+            <div className="flex items-center gap-3 self-start sm:self-auto">
+              {order.status === 'NEGOTIATING' && (
+                <button onClick={handleCancelSearch} disabled={loading === 'cancel-search'} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-colors focus:outline-none">
+                  <X className="w-3.5 h-3.5" />
+                  Cancel Search
+                </button>
+              )}
+              <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                {order.status}
+              </span>
+            </div>
           </div>
 
           <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 bg-slate-50/30">
@@ -194,7 +212,7 @@ export default function OrderDetailsClient({ order, vendorMap }: { order: any, v
                           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide md:mb-1">Allocated</span>
                           {order.status === 'DRAFT' ? (
                             <span className="text-2xl font-bold text-slate-300">-</span>
-                          ) : order.status === 'NEGOTIATING' ? (
+                          ) : allocation.status === 'PENDING' || allocation.status === 'NEGOTIATING' || allocation.status === 'NEEDS_REVIEW' ? (
                             <span className="text-lg font-bold text-amber-500">On Negotiation</span>
                           ) : (
                             <span className="text-2xl font-bold text-blue-600">
@@ -224,7 +242,7 @@ export default function OrderDetailsClient({ order, vendorMap }: { order: any, v
                       <div className="flex flex-row md:flex-col items-center justify-between md:items-end gap-4 md:w-48 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100">
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-500/10">
                           <Clock className="w-3.5 h-3.5" />
-                          {order.status === 'NEGOTIATING' ? 'PENDING' : allocation.status}
+                          {order.status === 'DRAFT' ? 'DRAFT' : allocation.status}
                         </span>
                         
                         {vendor.is_bot_active !== false ? (
@@ -249,6 +267,26 @@ export default function OrderDetailsClient({ order, vendorMap }: { order: any, v
                       </div>
 
                     </div>
+
+                    {allocation.status === 'NEEDS_REVIEW' && (
+                      <div className="bg-blue-50/50 p-5 rounded-xl border border-blue-100 mt-4 mx-6 mb-6">
+                        <p className="text-sm font-medium text-blue-800 mb-3 leading-relaxed">
+                          {vendor.name} mengajukan penawaran untuk <strong>{allocation.allocated_qty} {order.unit || 'Kg'}</strong> dengan harga <strong>Rp {allocation.agreed_price?.toLocaleString('id-ID')}</strong>. Silakan hubungi manual untuk negosiasi lebih lanjut. Mulai dari sini Anda bisa <em>take over</em> (Deal), atau membatalkan penawaran ini (Batal).
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <form onSubmit={(e) => { e.preventDefault(); handleUpdate(allocation.vendor_id, 'PARTIAL_ACCEPTED', e.currentTarget); }}>
+                            <button type="submit" disabled={loading === allocation.vendor_id} className="px-5 py-2.5 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-sm font-semibold transition-colors shadow-sm disabled:opacity-70">
+                              Deal (Terima)
+                            </button>
+                          </form>
+                          <form onSubmit={(e) => { e.preventDefault(); handleUpdate(allocation.vendor_id, 'REJECTED', e.currentTarget); }}>
+                            <button type="submit" disabled={loading === allocation.vendor_id} className="px-5 py-2.5 bg-slate-200 text-slate-800 hover:bg-slate-300 rounded-xl text-sm font-semibold transition-colors disabled:opacity-70">
+                              Batal (Cari Vendor Lain)
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Payment sections */}
                     {((allocation.status === 'WAITING_FOR_DP' || allocation.dp_required) || allocation.proof_image_url || (allocation.status === 'ACCEPTED' || allocation.status === 'PARTIAL_ACCEPTED')) && (

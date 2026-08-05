@@ -4,7 +4,7 @@ export interface IAllocation {
   vendor_id: mongoose.Types.ObjectId;
   allocated_qty: number;
   agreed_price: number;
-  status: 'PENDING' | 'NEGOTIATING' | 'ACCEPTED' | 'PARTIAL_ACCEPTED' | 'REJECTED' | 'COMPLETED' | 'CANCELED' | 'WAITING_FOR_DP' | 'ON_DELIVERY';
+  status: 'PENDING' | 'NEGOTIATING' | 'NEEDS_REVIEW' | 'ACCEPTED' | 'PARTIAL_ACCEPTED' | 'REJECTED' | 'COMPLETED' | 'CANCELED' | 'WAITING_FOR_DP' | 'ON_DELIVERY';
   proof_image_url?: string;
   dp_required?: boolean;
   dp_amount?: number;
@@ -31,7 +31,7 @@ const AllocationSchema = new Schema<IAllocation>({
   vendor_id: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true },
   allocated_qty: { type: Number, required: true },
   agreed_price: { type: Number, required: true },
-  status: { type: String, enum: ['PENDING', 'NEGOTIATING', 'ACCEPTED', 'PARTIAL_ACCEPTED', 'REJECTED', 'COMPLETED', 'CANCELED', 'WAITING_FOR_DP', 'ON_DELIVERY'], default: 'PENDING' },
+  status: { type: String, enum: ['PENDING', 'NEGOTIATING', 'NEEDS_REVIEW', 'ACCEPTED', 'PARTIAL_ACCEPTED', 'REJECTED', 'COMPLETED', 'CANCELED', 'WAITING_FOR_DP', 'ON_DELIVERY'], default: 'PENDING' },
   proof_image_url: { type: String },
   dp_required: { type: Boolean, default: false },
   dp_amount: { type: Number, default: 0 },

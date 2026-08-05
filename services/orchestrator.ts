@@ -62,17 +62,56 @@ export async function allocateRemainingQuantity(orderId: string, remainingQty: n
     const availableVendors = vendors.filter(v => !existingVendorIds.includes(v._id.toString()));
 
     if (availableVendors.length > 0) {
+      const nextVendor = availableVendors[0];
       order.allocations.push({
-        vendor_id: availableVendors[0]._id,
+        vendor_id: nextVendor._id,
         allocated_qty: remainingQty,
-        status: 'PENDING',
+        status: 'NEGOTIATING',
         agreed_price: 0
       });
       await order.save();
+
+      let phone = nextVendor.whatsapp_number.replace(/\D/g, '');
+      if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+      if (!phone.endsWith('@c.us')) phone += '@c.us';
+      const message = `Halo, kami dari Agro-Procurement. Kami membutuhkan pasokan ${order.item_name} sebanyak ${remainingQty}. Apakah Anda dapat memenuhinya? Jika ya, mohon informasikan berapa harga per ${order.unit || 'Kg'} yang Anda tawarkan.`;
+      
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_BOT_API_URL || 'http://localhost:3001';
+        fetch(`${apiUrl}/api/send-message`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ number: phone, message })
+        }).catch(err => console.error(err));
+      } catch (e) {}
     }
     
     return order;
   } catch (error) {
     throw error;
+  }
+}
+
+export async function reallocateDeficit(orderId: string) {
+  try {
+    await connectToDatabase();
+    const order = await Order.findById(orderId);
+    if (!order) return null;
+
+    let fulfilledQty = 0;
+    order.allocations.forEach((a: any) => {
+      if (['ACCEPTED', 'PARTIAL_ACCEPTED', 'WAITING_FOR_DP', 'ON_DELIVERY', 'COMPLETED', 'NEEDS_REVIEW', 'NEGOTIATING', 'PENDING'].includes(a.status)) {
+        fulfilledQty += a.allocated_qty;
+      }
+    });
+
+    const deficit = order.total_quantity - fulfilledQty;
+    if (deficit > 0) {
+      return await allocateRemainingQuantity(orderId, deficit);
+    }
+    return order;
+  } catch (error) {
+    console.error(error);
+    return null;
   }
 }

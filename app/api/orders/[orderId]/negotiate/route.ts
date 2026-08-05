@@ -51,7 +51,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ orderId
             phone += '@c.us';
           }
 
-          const message = `Halo, kami dari Agro-Procurement. Kami membutuhkan pasokan ${order.item_name} sebanyak ${allocation.allocated_qty}. Apakah Anda dapat memenuhinya dengan harga maksimal Rp ${order.max_price_het.toLocaleString('id-ID')}? Balas YA atau TIDAK.`;
+          const message = `Halo, kami dari Agro-Procurement. Kami membutuhkan pasokan ${order.item_name} sebanyak ${allocation.allocated_qty}. Apakah Anda dapat memenuhinya? Jika ya, mohon informasikan berapa harga per ${order.unit || 'Kg'} yang Anda tawarkan.`;
 
           try {
             const apiUrl = process.env.NEXT_PUBLIC_BOT_API_URL || 'http://localhost:3001';
