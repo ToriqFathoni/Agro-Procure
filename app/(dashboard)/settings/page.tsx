@@ -37,6 +37,7 @@ export default function SettingsPage() {
   const [qrCodeData, setQrCodeData] = useState('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [qrCode, setQrCode] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -101,6 +102,17 @@ export default function SettingsPage() {
 
     const qrInterval = setInterval(fetchQR, 3000);
     return () => clearInterval(qrInterval);
+  }, []);
+
+  useEffect(() => {
+    const fetchStatusInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BOT_API_URL}/api/status`);
+        const data = await res.json();
+        setIsConnected(!!data.connected);
+      } catch (error) {}
+    }, 3000);
+    return () => clearInterval(fetchStatusInterval);
   }, []);
 
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -420,53 +432,43 @@ export default function SettingsPage() {
                   <h3 className="font-bold text-slate-900 text-base">WhatsApp Business API</h3>
                   <p className="text-sm text-slate-500 mt-0.5 font-medium flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
-                    {connectionStatus === 'AUTHENTICATED' || connectionStatus === 'connected' ? 'Connected and receiving updates.' : 'Receive real-time AI negotiation updates.'}
+                    {isConnected ? 'Connected and receiving updates.' : 'Receive real-time AI negotiation updates.'}
                   </p>
                 </div>
               </div>
               
-              {connectionStatus === 'AUTHENTICATED' || connectionStatus === 'connected' ? (
-                <div className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full uppercase tracking-wider">
-                  Connected
-                </div>
-              ) : connectionStatus === 'QR_READY' || connectionStatus === 'qr_ready' ? (
-                null
-              ) : (
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={handleConnect}
-                    disabled={isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing'}
-                    className="hidden sm:block w-full sm:w-auto bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 whitespace-nowrap disabled:opacity-50"
-                  >
-                    {isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing' ? 'Initializing...' : 'Connect WhatsApp'}
-                  </button>
-                  {qrCode && (
-                    <div className="hidden sm:block p-2 bg-white rounded-lg shadow-sm border border-slate-100">
-                      <QRCodeSVG value={qrCode} size={100} />
-                    </div>
-                  )}
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleConnect}
+                  disabled={isConnected || isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing'}
+                  className={`hidden sm:block w-full sm:w-auto text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 whitespace-nowrap disabled:opacity-50 ${isConnected ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed' : 'bg-[#25D366] hover:bg-[#20bd5a] focus:ring-[#25D366] focus:ring-offset-2'}`}
+                >
+                  {isConnected ? 'Connected' : (isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing' ? 'Initializing...' : 'Connect WhatsApp')}
+                </button>
+                {!isConnected && qrCode && (
+                  <div className="hidden sm:block p-2 bg-white rounded-lg shadow-sm border border-slate-100">
+                    <QRCodeSVG value={qrCode} size={100} />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:hidden w-full gap-4 mt-4">
+              <button 
+                onClick={handleConnect}
+                disabled={isConnected || isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing'}
+                className={`w-full text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 whitespace-nowrap disabled:opacity-50 ${isConnected ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed' : 'bg-[#25D366] hover:bg-[#20bd5a] focus:ring-[#25D366] focus:ring-offset-2'}`}
+              >
+                {isConnected ? 'Connected' : (isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing' ? 'Initializing...' : 'Connect WhatsApp')}
+              </button>
+              {!isConnected && qrCode && (
+                <div className="self-center p-2 bg-white rounded-lg shadow-sm border border-slate-100 mt-2">
+                  <QRCodeSVG value={qrCode} size={150} />
                 </div>
               )}
             </div>
 
-            {connectionStatus !== 'AUTHENTICATED' && connectionStatus !== 'connected' && (
-              <div className="flex flex-col sm:hidden w-full gap-4">
-                <button 
-                  onClick={handleConnect}
-                  disabled={isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing'}
-                  className="w-full bg-[#25D366] hover:bg-[#20bd5a] text-white rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 whitespace-nowrap disabled:opacity-50"
-                >
-                  {isConnecting || connectionStatus === 'INITIALIZING' || connectionStatus === 'initializing' ? 'Initializing...' : 'Connect WhatsApp'}
-                </button>
-                {qrCode && (
-                  <div className="self-center p-2 bg-white rounded-lg shadow-sm border border-slate-100 mt-2">
-                    <QRCodeSVG value={qrCode} size={150} />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {(connectionStatus === 'QR_READY' || connectionStatus === 'qr_ready') && qrCodeData && (
+            {!isConnected && (connectionStatus === 'QR_READY' || connectionStatus === 'qr_ready') && qrCodeData && (
               <div className="flex flex-col items-start p-6 bg-white rounded-lg border border-slate-200 mt-4 w-full sm:w-auto">
                 <p className="mb-4 text-sm font-medium text-slate-900">Scan this QR code with your WhatsApp</p>
                 <div className="p-4 bg-white rounded-lg shadow-sm border border-slate-100 self-center sm:self-start">
