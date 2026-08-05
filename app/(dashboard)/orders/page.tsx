@@ -344,7 +344,7 @@ export default function Dashboard() {
                   {/* Total Quantity */}
                   <div>
                     <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Total Quantity</label>
-                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-1 py-1 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all overflow-hidden">
+                    <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-2 py-2 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all overflow-hidden">
                       <Hash className="w-5 h-5 text-slate-400 shrink-0" />
                       <input 
                         type="number" 
@@ -354,14 +354,14 @@ export default function Dashboard() {
                         value={formData.total_quantity}
                         onChange={handleInputChange}
                         placeholder="0"
-                        className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm ml-3 font-medium text-slate-900 placeholder:text-slate-400 p-1.5 m-0 shadow-none w-full"
+                        className="flex-1 min-w-0 bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-sm ml-3 font-medium text-slate-900 placeholder:text-slate-400 p-0 m-0 shadow-none w-full"
                       />
-                      <div className="w-px h-5 bg-slate-300 shrink-0 mx-1"></div>
+                      <div className="w-px h-5 bg-slate-300 shrink-0 mx-2"></div>
                       <select 
                         name="unit"
                         value={formData.unit}
                         onChange={handleInputChange}
-                        className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-slate-600 font-semibold text-sm cursor-pointer p-1.5 pr-7 shrink-0 shadow-none"
+                        className="bg-transparent border-none outline-none focus:outline-none focus:ring-0 text-slate-600 font-semibold text-sm cursor-pointer p-0 pr-6 shrink-0 shadow-none"
                       >
                         <option value="Kg">Kg</option>
                         <option value="Gram">Gram</option>

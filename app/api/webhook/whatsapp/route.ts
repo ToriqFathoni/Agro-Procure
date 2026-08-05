@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       status: 'NEGOTIATING',
       'allocations.vendor_id': vendor._id,
       'allocations.status': 'NEGOTIATING'
-    });
+    }).sort({ createdAt: -1 });
 
     if (!order) {
       return NextResponse.json({ success: false, error: 'No active negotiating order for this vendor' }, { status: 404 });

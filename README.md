@@ -68,6 +68,12 @@ Setelah pesan terkirim, Anda cukup bersantai dan membiarkan AI yang membalas Wha
   - Status vendor ini di Dashboard menjadi `NEEDS_REVIEW` (Butuh Keputusan Anda: *Deal* atau *Batal*).
   - **Sistem akan langsung mencari vendor peringkat kedua** untuk menutupi sisa kekurangan (50 ekor) dan langsung menge-chat vendor kedua secara otomatis!
 
+> ⚠️ **Catatan Penting (Waktu Respons AI):** 
+> AI mungkin membutuhkan waktu beberapa saat (sekitar **5 hingga 15 menit**) untuk merespons pesan vendor. Hal ini sangat normal dan disebabkan oleh beberapa faktor:
+> 1. AI (Gemini) harus "berpikir" dan menyusun kalimat balasan yang natural serta sesuai dengan konteks percakapan.
+> 2. Keterbatasan server *free-tier* pada Vercel/Railway yang terkadang mengalami *Cold Start* (server tidur saat tidak ada request) sehingga butuh waktu ekstra untuk bangun.
+> Mohon untuk tidak mengirim pesan berulang-ulang, sistem pasti akan merespons setelah AI selesai berpikir.
+
 ### 7. 🚚 Pengiriman & Penyelesaian Pesanan
 Setelah negosiasi selesai dan Anda mendapatkan vendor yang tepat:
 1. Di halaman Order Details, jika status sudah `ACCEPTED`, Anda dapat mengubah statusnya ke tahap selanjutnya.
