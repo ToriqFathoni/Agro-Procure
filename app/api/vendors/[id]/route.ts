@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import { Vendor } from '@/models/Vendor';
 
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { status } = await req.json();
     if (!status) {
@@ -11,8 +11,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     await connectToDatabase();
     
-    // We await resolving params as standard practice for dynamic routes in newer Next versions
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
     const vendorId = resolvedParams.id;
 
     const vendor = await Vendor.findByIdAndUpdate(vendorId, { status }, { new: true });

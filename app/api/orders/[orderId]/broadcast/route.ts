@@ -4,10 +4,10 @@ import { Order } from '@/models/Order';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: any }
+  { params }: { params: Promise<{ orderId: string }> }
 ) {
   try {
-    const resolvedParams = await Promise.resolve(params);
+    const resolvedParams = await params;
     const orderId = resolvedParams.orderId;
 
     await connectToDatabase();

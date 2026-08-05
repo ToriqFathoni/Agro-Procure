@@ -7,14 +7,14 @@ import { Vendor } from '@/models/Vendor';
 import OrderDetailsClient from './OrderDetailsClient';
 import { calculateDistance } from '@/utils/distance';
 
-export default async function OrderDetailPage(props: { params: any }) {
+export default async function OrderDetailPage(props: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
     redirect('/login');
   }
 
-  const resolvedParams = await Promise.resolve(props.params);
+  const resolvedParams = await props.params;
 
   await connectToDatabase();
 

@@ -21,10 +21,23 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const sessionContext = useSession();
+  const session = sessionContext?.data;
+  const router = useRouter();
+
+  const handleCTA = () => {
+    if (session) {
+      router.push('/orders');
+    } else {
+      router.push('/login');
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,15 +63,14 @@ export default function Home() {
             </div>
             
             <div className="hidden md:flex items-center gap-8">
-              <a href="#" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Solusi</a>
-              <a href="#" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Cara Kerja</a>
-              <a href="#" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Ekosistem</a>
+              <a href="#solusi" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Solusi</a>
+              <a href="#cara-kerja" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Cara Kerja</a>
+              <a href="#ekosistem" className={`font-medium text-sm hover:opacity-75 transition-opacity ${isScrolled ? 'text-slate-600' : 'text-blue-50'}`}>Ekosistem</a>
             </div>
 
             <div className="hidden md:flex items-center gap-4">
-              <Link href="/login" className={`font-medium text-sm transition-colors ${isScrolled ? 'text-blue-600' : 'text-white'}`}>Masuk</Link>
-              <button className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-[0_8px_16px_-6px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_20px_-6px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 transition-all duration-200">
-                Request Demo
+              <button onClick={handleCTA} className="bg-emerald-500 hover:bg-emerald-400 text-white px-6 py-2.5 rounded-full font-semibold text-sm shadow-[0_8px_16px_-6px_rgba(16,185,129,0.4)] hover:shadow-[0_12px_20px_-6px_rgba(16,185,129,0.5)] hover:-translate-y-0.5 transition-all duration-200">
+                Login
               </button>
             </div>
 
@@ -74,12 +86,11 @@ export default function Home() {
 
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-white pt-24 px-4 flex flex-col gap-4 md:hidden">
-          <a href="#" className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Solusi</a>
-          <a href="#" className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Cara Kerja</a>
-          <a href="#" className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Ekosistem</a>
+          <a href="#solusi" onClick={() => setMobileMenuOpen(false)} className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Solusi</a>
+          <a href="#cara-kerja" onClick={() => setMobileMenuOpen(false)} className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Cara Kerja</a>
+          <a href="#ekosistem" onClick={() => setMobileMenuOpen(false)} className="text-lg font-semibold text-slate-800 py-2 border-b border-slate-100">Ekosistem</a>
           <div className="flex flex-col gap-3 mt-4">
-            <Link href="/login" className="w-full text-center bg-blue-50 text-blue-600 px-6 py-3 rounded-xl font-semibold">Masuk</Link>
-            <button className="w-full bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-md">Request Demo</button>
+            <button onClick={() => { setMobileMenuOpen(false); handleCTA(); }} className="w-full bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold shadow-md">Login</button>
           </div>
         </div>
       )}
@@ -92,14 +103,6 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
             <div className="text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/30 border border-blue-400/30 text-blue-50 text-sm font-semibold mb-6 backdrop-blur-sm shadow-inner">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-                </span>
-                Sistem AI Orchestrator Aktif
-              </div>
-              
               <h1 className="text-4xl sm:text-5xl lg:text-[4rem] font-bold text-white leading-[1.1] mb-6 tracking-tight">
                 Revolusi Rantai <br className="hidden lg:block" />
                 Pasok F&B.
@@ -109,11 +112,8 @@ export default function Home() {
               </p>
               
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
-                <button className="w-full sm:w-auto bg-emerald-500 text-white px-8 py-3.5 rounded-full font-semibold text-base hover:bg-emerald-400 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] hover:shadow-[0_12px_24px_-6px_rgba(16,185,129,0.6)] hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-2">
+                <button onClick={handleCTA} className="w-full sm:w-auto bg-emerald-500 text-white px-8 py-3.5 rounded-full font-semibold text-base hover:bg-emerald-400 shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] hover:shadow-[0_12px_24px_-6px_rgba(16,185,129,0.6)] hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-2">
                   Mulai Transformasi <ArrowRight className="w-5 h-5" />
-                </button>
-                <button className="w-full sm:w-auto px-8 py-3.5 rounded-full font-semibold text-white bg-blue-700/50 border border-blue-400/30 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 backdrop-blur-sm">
-                  <Play className="w-5 h-5 fill-current" /> Lihat Cara Kerja
                 </button>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function Home() {
             <div className="relative mx-auto w-full max-w-md lg:max-w-full lg:h-[500px] mt-10 lg:mt-0">
               <div className="relative z-0 rounded-[2rem] overflow-hidden border-4 border-white/20 shadow-2xl shadow-blue-900/40 aspect-[4/3] lg:absolute lg:top-0 lg:right-12 lg:w-[480px]">
                 <img 
-                  src="https://images.unsplash.com/photo-1595856364531-419b78e34be6?q=80&w=800&auto=format&fit=crop" 
+                  src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?q=80&w=1000&auto=format&fit=crop" 
                   alt="Farmer showing produce" 
                   className="w-full h-full object-cover"
                 />
@@ -163,8 +163,8 @@ export default function Home() {
           <path d="M0,60 C480,180 960,-60 1440,60 L1440,120 L0,120 Z"></path>
         </svg>
       </section>
-
-      <section className="bg-blue-50 py-10 relative z-20">
+      {/* 
+      <section id="ekosistem" className="bg-blue-50 py-10 relative z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider mb-8">
             Dipercaya oleh Ekosistem F&B Terdepan
@@ -177,8 +177,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+      */}
 
-      <section className="py-24 bg-gradient-to-b from-blue-50 via-white to-slate-50 relative overflow-hidden">
+      <section id="solusi" className="py-24 bg-gradient-to-b from-blue-50 via-white to-slate-50 relative overflow-hidden">
         
         <div className="absolute top-40 left-0 w-96 h-96 bg-emerald-200/40 rounded-full blur-3xl opacity-50 -translate-x-1/2 pointer-events-none"></div>
         <div className="absolute top-1/2 right-0 w-[30rem] h-[30rem] bg-blue-200/40 rounded-full blur-3xl opacity-50 translate-x-1/3 pointer-events-none"></div>
@@ -195,7 +196,7 @@ export default function Home() {
 
           <div className="space-y-32">
             
-            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <div id="cara-kerja" className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
               <div className="order-2 lg:order-1">
                 <div className="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
                   <Smartphone className="w-7 h-7 text-blue-600" />
@@ -303,11 +304,6 @@ export default function Home() {
                 <p className="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
                   Mekanisme lelang otomatis yang menguntungkan kedua belah pihak. Sistem menolak harga manipulatif dan menjaga rentang harga wajar sesuai data pasar real-time.
                 </p>
-                <div className="flex gap-4">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold shadow-md transition-colors flex items-center gap-2">
-                    Pelajari Mekanisme <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
               </div>
               <div className="order-1 lg:order-2 relative">
                 <div className="absolute inset-0 bg-blue-600 rounded-[2.5rem] transform rotate-3 scale-105 opacity-10"></div>
@@ -346,8 +342,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 relative z-10 text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">Siap Memutus Rantai Pasok Panjang?</h2>
           <p className="text-xl text-blue-100 mb-10 font-medium">Gabung dengan puluhan enterprise F&B yang telah menghemat biaya hingga 25% sambil menyejahterakan petani lokal.</p>
-          <button className="bg-emerald-500 hover:bg-emerald-400 text-white px-10 py-4 rounded-full font-bold text-lg shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all duration-200">
-            Jadwalkan Demo Sekarang
+          <button onClick={handleCTA} className="bg-emerald-500 hover:bg-emerald-400 text-white px-10 py-4 rounded-full font-bold text-lg shadow-[0_8px_20px_-6px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all duration-200">
+            Mulai Sekarang
           </button>
         </div>
       </section>
